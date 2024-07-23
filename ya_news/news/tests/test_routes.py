@@ -4,7 +4,6 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
 from news.models import Comment, News
 
 User = get_user_model()
@@ -36,7 +35,7 @@ class TestRoutes(TestCase):
                 url = reverse(name, args=args)
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
     def test_availability_for_comment_edit_and_delete(self):
         users_statuses = (
             (self.author, HTTPStatus.OK),
@@ -44,8 +43,8 @@ class TestRoutes(TestCase):
         )
         for user, status in users_statuses:
             self.client.force_login(user)
-            for name in ('news:edit', 'news:delete'):  
-                with self.subTest(user=user, name=name):        
+            for name in ('news:edit', 'news:delete'):
+                with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.comment.id,))
                     response = self.client.get(url)
                     self.assertEqual(response.status_code, status)
