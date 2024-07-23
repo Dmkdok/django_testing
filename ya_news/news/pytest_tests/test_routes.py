@@ -37,9 +37,9 @@ def test_pages_accessible_for_anonymous_user(client, url_name, args):
     )
 )
 def test_availability_edit_delete_comment_for_different_users(
-        parametrized_client, url_name, comment, expected_status
+        parametrized_client, url_name, comment_id, expected_status
 ):
-    url = reverse(url_name, args=(comment.id,))
+    url = reverse(url_name, args=(comment_id))
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
 
@@ -51,9 +51,9 @@ def test_availability_edit_delete_comment_for_different_users(
         'news:delete',
     )
 )
-def test_anonymous_user_redirects_to_login(client, url_name, comment):
+def test_anonymous_user_redirects_to_login(client, url_name, comment_id):
     login_url = reverse('users:login')
-    url = reverse(url_name, args=(comment.id,))
+    url = reverse(url_name, args=(comment_id))
     expected_redirect_url = f'{login_url}?next={url}'
     response = client.get(url)
     assertRedirects(response, expected_redirect_url)

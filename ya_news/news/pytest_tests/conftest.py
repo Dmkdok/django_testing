@@ -57,6 +57,11 @@ def news_id(news):
 
 
 @pytest.fixture
+def comment_id(comment):
+    return comment.id,
+
+
+@pytest.fixture
 def make_many_news():
     today = datetime.today()
     many_news = []

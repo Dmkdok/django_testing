@@ -15,7 +15,7 @@ def test_news_count(client, make_many_news):
 
 
 @pytest.mark.parametrize(
-    'parametrized_client, page_has_form',
+    'parametrized_client, page_contain_form',
     (
         (pytest.lazy_fixture('author_client'), True),
         (pytest.lazy_fixture('client'), False),
@@ -23,12 +23,12 @@ def test_news_count(client, make_many_news):
 )
 def test_comment_form_availability(
         parametrized_client,
-        page_has_form,
+        page_contain_form,
         news_id):
     url = reverse('news:detail', args=(news_id))
     response = parametrized_client.get(url)
     assert ('form' in response.context and isinstance(
-        response.context['form'], CommentForm)) is page_has_form
+        response.context['form'], CommentForm)) == page_contain_form
 
 
 def test_news_order(client, make_many_news):
@@ -45,6 +45,6 @@ def test_comments_order(client, news_id, make_many_comments):
     response = client.get(url)
     news = response.context['news']
     comments = news.comment_set.all()
-    all_timestamps = [comment.created for comment in comments]
-    sorted_timestamps = sorted(all_timestamps)
-    assert all_timestamps == sorted_timestamps
+    all_creation_dates = [comment.created for comment in comments]
+    sorted_creation_dates = sorted(all_creation_dates)
+    assert all_creation_dates == sorted_creation_dates
