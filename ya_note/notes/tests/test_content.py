@@ -1,8 +1,6 @@
-# notes/tests/test_content.py
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
 from notes.forms import NoteForm
 from notes.models import Note
 
@@ -13,11 +11,14 @@ class TestNotesListPage(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user1 = User.objects.create(username='User1', password='password')
-        cls.user2 = User.objects.create(username='User2', password='password')
-        cls.note1 = Note.objects.create(title='Note1', text='Text1', author=cls.user1, slug='note1')
-        cls.note2 = Note.objects.create(title='Note2', text='Text2', author=cls.user1, slug='note2')
-        cls.note3 = Note.objects.create(title='Note3', text='Text3', author=cls.user2, slug='note3')
+        cls.user1 = User.objects.create(username='User1')
+        cls.user2 = User.objects.create(username='User2')
+        cls.note1 = Note.objects.create(
+            title='Note1', text='Text1', author=cls.user1, slug='note1')
+        cls.note2 = Note.objects.create(
+            title='Note2', text='Text2', author=cls.user1, slug='note2')
+        cls.note3 = Note.objects.create(
+            title='Note3', text='Text3', author=cls.user2, slug='note3')
         cls.url = reverse('notes:list')
 
     def test_notes_in_object_list(self):
@@ -42,7 +43,8 @@ class TestNoteFormPages(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create(username='User')
-        cls.note = Note.objects.create(title='Note', text='Text', author=cls.user, slug='note')
+        cls.note = Note.objects.create(
+            title='Note', text='Text', author=cls.user)
         cls.create_url = reverse('notes:add')
         cls.edit_url = reverse('notes:edit', args=[cls.note.slug])
 

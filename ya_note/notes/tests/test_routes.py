@@ -3,7 +3,6 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-
 from notes.models import Note
 
 User = get_user_model()
@@ -20,7 +19,7 @@ class TestRoutes(TestCase):
             title='Заголовок',
             text='Текст заметки',
             author=cls.author,
-            slug='note-slug'
+            slug='nazvanie-zametki'
         )
         cls.author_client = Client()
         cls.author_client.force_login(cls.author)
@@ -39,7 +38,7 @@ class TestRoutes(TestCase):
                 url = reverse(name)
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
     def test_pages_availability_for_auth_user(self):
         urls = (
             'notes:list',
