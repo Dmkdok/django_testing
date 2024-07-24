@@ -38,7 +38,10 @@ def not_author_client(not_author):
 
 @pytest.fixture
 def news():
-    return News.objects.create(title='Какая-то новость', text='Текст новости')
+    return News.objects.create(
+        title='Какая-то новость',
+        text='Текст новости'
+    )
 
 
 @pytest.fixture
@@ -46,7 +49,8 @@ def comment(author, news):
     return Comment.objects.create(
         text='Какой-то комментарий',
         author=author,
-        news=news)
+        news=news
+    )
 
 
 @pytest.fixture

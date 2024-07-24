@@ -3,6 +3,7 @@ from http import HTTPStatus
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+
 from notes.forms import WARNING
 from notes.models import Note
 
@@ -34,7 +35,7 @@ class TestNoteCreation(TestCase):
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, initial_count + 1)
-        note = Note.objects.get()
+        note = Note.objects.latest('id')
         self.assertEqual(note.title, self.NOTE_TITLE)
         self.assertEqual(note.text, self.NOTE_TEXT)
         self.assertEqual(note.author, self.user)
@@ -42,7 +43,7 @@ class TestNoteCreation(TestCase):
     def test_slug_is_generated_if_not_provided(self):
         response = self.auth_client.post(self.url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
-        note = Note.objects.get()
+        note = Note.objects.latest('id')
         self.assertEqual(note.slug, self.NOTE_SLUG)
 
     def test_duplicate_slug_is_not_allowed(self):
@@ -86,16 +87,28 @@ class TestNoteEditDelete(TestCase):
                          'text': cls.NEW_NOTE_TEXT, 'slug': cls.note.slug}
 
     def test_author_can_edit_note(self):
+        initial_count = Note.objects.count()
         response = self.author_client.post(self.edit_url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
+        notes_count = Note.objects.count()
+        self.assertEqual(notes_count, initial_count)
         self.note.refresh_from_db()
+        self.assertEqual(self.note.title, self.NOTE_TITLE)
         self.assertEqual(self.note.text, self.NEW_NOTE_TEXT)
+        self.assertEqual(self.note.slug, self.NOTE_SLUG)
+        self.assertEqual(self.note.author, self.user)
 
     def test_other_user_cant_edit_note(self):
+        initial_count = Note.objects.count()
         response = self.other_client.post(self.edit_url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        notes_count = Note.objects.count()
+        self.assertEqual(notes_count, initial_count)
         self.note.refresh_from_db()
+        self.assertEqual(self.note.title, self.NOTE_TITLE)
         self.assertEqual(self.note.text, self.NOTE_TEXT)
+        self.assertEqual(self.note.slug, self.NOTE_SLUG)
+        self.assertEqual(self.note.author, self.user)
 
     def test_author_can_delete_note(self):
         initial_count = Note.objects.count()
