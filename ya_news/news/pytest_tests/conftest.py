@@ -50,16 +50,6 @@ def comment(author, news):
 
 
 @pytest.fixture
-def news_id(news):
-    return news.id,
-
-
-@pytest.fixture
-def comment_id(comment):
-    return comment.id,
-
-
-@pytest.fixture
 def make_many_news():
     now = timezone.now()
     many_news = []
