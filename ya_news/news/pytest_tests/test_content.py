@@ -24,8 +24,8 @@ def test_news_count(client, make_many_news):
 def test_comment_form_availability(
         parametrized_client,
         page_contain_form,
-        news_id):
-    url = reverse('news:detail', args=(news_id))
+        news):
+    url = reverse('news:detail', args=(news.id,))
     response = parametrized_client.get(url)
     assert ('form' in response.context and isinstance(
         response.context['form'], CommentForm)) == page_contain_form
@@ -40,8 +40,8 @@ def test_news_order(client, make_many_news):
     assert all_dates == sorted_dates
 
 
-def test_comments_order(client, news_id, make_many_comments):
-    url = reverse('news:detail', args=(news_id))
+def test_comments_order(client, news, make_many_comments):
+    url = reverse('news:detail', args=(news.id,))
     response = client.get(url)
     news = response.context['news']
     comments = news.comment_set.all()

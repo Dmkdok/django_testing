@@ -3,13 +3,14 @@ from http import HTTPStatus
 import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects
+from news.models import News
 
 
 @pytest.mark.parametrize(
     'url_name, args',
     (
         ('news:home', None),
-        ('news:detail', pytest.lazy_fixture('news_id')),
+        ('news:detail', pytest.lazy_fixture('news')),
         ('users:login', None),
         ('users:logout', None),
         ('users:signup', None),
@@ -17,6 +18,9 @@ from pytest_django.asserts import assertRedirects
 )
 @pytest.mark.django_db
 def test_pages_accessible_for_anonymous_user(client, url_name, args):
+    if isinstance(args, News):
+        args = (args.id,)
+
     url = reverse(url_name, args=args)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
