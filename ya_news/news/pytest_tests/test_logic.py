@@ -7,11 +7,13 @@ from news.models import Comment
 from pytest_django.asserts import assertFormError, assertRedirects
 
 
+FORM_DATA = {'text': 'Новый текст комментария'}
+
 @pytest.mark.django_db
-def test_anonymous_user_cannot_create_comment(client, form_data, news_id):
+def test_anonymous_user_cannot_create_comment(client, news_id):
     url = reverse('news:detail', args=(news_id))
     comments_before = Comment.objects.count()
-    response = client.post(url, data=form_data)
+    response = client.post(url, data=FORM_DATA)
     comments_after = Comment.objects.count()
     login_url = reverse('users:login')
     expected_redirect_url = f'{login_url}?next={url}'
@@ -20,16 +22,16 @@ def test_anonymous_user_cannot_create_comment(client, form_data, news_id):
 
 
 def test_authorized_user_can_create_comment(
-        author_client, author, form_data, news_id
+        author_client, author, news_id
 ):
     url = reverse('news:detail', args=(news_id))
     comments_before = Comment.objects.count()
-    response = author_client.post(url, data=form_data)
+    response = author_client.post(url, data=FORM_DATA)
     assertRedirects(response, f'{url}#comments')
     comments_after = Comment.objects.count()
     assert comments_after == comments_before + 1
     new_comment = Comment.objects.get()
-    assert new_comment.text == form_data['text']
+    assert new_comment.text == FORM_DATA['text']
     assert new_comment.author == author
 
 
@@ -49,21 +51,21 @@ def test_comment_with_bad_words_is_not_created(author_client, news_id):
 
 
 def test_author_can_edit_own_comment(
-        author_client, comment, form_data, news_id
+        author_client, comment, news_id
 ):
     url = reverse('news:edit', args=(comment.id,))
     news_url = reverse('news:detail', args=(news_id))
-    response = author_client.post(url, data=form_data)
+    response = author_client.post(url, data=FORM_DATA)
     assertRedirects(response, f'{news_url}#comments')
     comment.refresh_from_db()
-    assert comment.text == form_data['text']
+    assert comment.text == FORM_DATA['text']
 
 
 def test_author_cannot_edit_other_users_comment(
-        not_author_client, comment, form_data
+        not_author_client, comment
 ):
     url = reverse('news:edit', args=(comment.id,))
-    response = not_author_client.post(url, data=form_data)
+    response = not_author_client.post(url, data=FORM_DATA)
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment_from_db = Comment.objects.get(id=comment.id)
     assert comment.text == comment_from_db.text

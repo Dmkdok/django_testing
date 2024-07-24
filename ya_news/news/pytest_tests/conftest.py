@@ -50,11 +50,6 @@ def comment(author, news):
 
 
 @pytest.fixture
-def form_data():
-    return {'text': 'Новый текст комментария'}
-
-
-@pytest.fixture
 def news_id(news):
     return news.id,
 
