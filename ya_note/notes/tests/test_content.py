@@ -11,31 +11,31 @@ class TestNotesListPage(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user1 = User.objects.create(username='User1')
-        cls.user2 = User.objects.create(username='User2')
-        cls.note1 = Note.objects.create(
-            title='Note1', text='Text1', author=cls.user1, slug='note1')
-        cls.note2 = Note.objects.create(
-            title='Note2', text='Text2', author=cls.user1, slug='note2')
-        cls.note3 = Note.objects.create(
-            title='Note3', text='Text3', author=cls.user2, slug='note3')
-        cls.url = reverse('notes:list')
+        cls.first_user = User.objects.create(username='User1')
+        cls.second_user = User.objects.create(username='User2')
+        cls.first_note = Note.objects.create(
+            title='Note1', text='Text', author=cls.first_user, slug='note1')
+        cls.second_note = Note.objects.create(
+            title='Note2', text='Text2', author=cls.first_user, slug='note2')
+        cls.third_note = Note.objects.create(
+            title='Note3', text='Text3', author=cls.second_user, slug='note3')
+        cls.notes_list_url = reverse('notes:list')
 
     def test_notes_in_object_list(self):
-        self.client.force_login(self.user1)
-        response = self.client.get(self.url)
+        self.client.force_login(self.first_user)
+        response = self.client.get(self.notes_list_url)
         object_list = response.context['object_list']
-        self.assertIn(self.note1, object_list)
-        self.assertIn(self.note2, object_list)
-        self.assertNotIn(self.note3, object_list)
+        self.assertIn(self.first_note, object_list)
+        self.assertIn(self.second_note, object_list)
+        self.assertNotIn(self.third_note, object_list)
 
     def test_other_users_notes_not_in_object_list(self):
-        self.client.force_login(self.user2)
-        response = self.client.get(self.url)
+        self.client.force_login(self.second_user)
+        response = self.client.get(self.notes_list_url)
         object_list = response.context['object_list']
-        self.assertIn(self.note3, object_list)
-        self.assertNotIn(self.note1, object_list)
-        self.assertNotIn(self.note2, object_list)
+        self.assertIn(self.third_note, object_list)
+        self.assertNotIn(self.first_note, object_list)
+        self.assertNotIn(self.second_note, object_list)
 
 
 class TestNoteFormPages(TestCase):

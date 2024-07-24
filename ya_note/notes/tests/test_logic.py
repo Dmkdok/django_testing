@@ -23,15 +23,17 @@ class TestNoteCreation(TestCase):
         cls.form_data = {'title': cls.NOTE_TITLE, 'text': cls.NOTE_TEXT}
 
     def test_anonymous_user_cant_create_note(self):
+        initial_count = Note.objects.count()
         self.client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 0)
+        self.assertEqual(notes_count, initial_count)
 
     def test_user_can_create_note(self):
+        initial_count = Note.objects.count()
         response = self.auth_client.post(self.url, data=self.form_data)
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, initial_count + 1)
         note = Note.objects.get()
         self.assertEqual(note.title, self.NOTE_TITLE)
         self.assertEqual(note.text, self.NOTE_TEXT)
@@ -46,6 +48,7 @@ class TestNoteCreation(TestCase):
     def test_duplicate_slug_is_not_allowed(self):
         Note.objects.create(title=self.NOTE_TITLE, text=self.NOTE_TEXT,
                             author=self.user, slug=self.NOTE_SLUG)
+        initial_count = Note.objects.count()
         response = self.auth_client.post(self.url, data=self.form_data)
         self.assertFormError(
             response,
@@ -54,7 +57,7 @@ class TestNoteCreation(TestCase):
             errors=self.NOTE_SLUG + WARNING
         )
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, initial_count)
 
 
 class TestNoteEditDelete(TestCase):
@@ -95,13 +98,15 @@ class TestNoteEditDelete(TestCase):
         self.assertEqual(self.note.text, self.NOTE_TEXT)
 
     def test_author_can_delete_note(self):
+        initial_count = Note.objects.count()
         response = self.author_client.post(self.delete_url)
         self.assertRedirects(response, reverse('notes:success'))
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 0)
+        self.assertEqual(notes_count, initial_count - 1)
 
     def test_other_user_cant_delete_note(self):
+        initial_count = Note.objects.count()
         response = self.other_client.post(self.delete_url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         notes_count = Note.objects.count()
-        self.assertEqual(notes_count, 1)
+        self.assertEqual(notes_count, initial_count)
